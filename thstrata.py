@@ -59,7 +59,6 @@ class Transmittance(object):
                 rst.append(1 / sum(p_rst))
             else:
                 rst.append(self.rst(strat, i[0]))
-
         resistance = sum(rst) * area  # (m^2 K)/W
         return resistance
 
@@ -110,7 +109,7 @@ class Transmittance(object):
         return rst
 
 
-if __name__ == '__main__':
+def main(self):
     pattern = '1, (2,3,4)//5//(6,7), 8'
     stratigraphy = {
         '1': {'mat': 1, 'thk': 1, 'area': 3, 'cnd': .1},
@@ -124,4 +123,8 @@ if __name__ == '__main__':
     }
     area = 3
 
-    transmittance = Transmittance(pattern, stratigraphy, area)
+    Transmittance(pattern, stratigraphy, area)
+
+
+if __name__ == '__main__':
+    main()
