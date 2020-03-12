@@ -25,6 +25,10 @@ class Transmittance(object):
     'cnd': conduttivity
     'rst': resistance
     """
+    def __init__(self, pattern, strat, area):
+        self.transmittance = 1 / self.global_resistance(pattern, strat, area)
+        print(self.transmittance)
+
     def global_resistance(self, pattern, strat, area):
         """Calculate the resistance of a given pattern of a stratigraphy.
 
@@ -57,7 +61,6 @@ class Transmittance(object):
                 rst.append(self.rst(strat, i[0]))
 
         resistance = sum(rst) * area  # (m^2 K)/W
-        print(resistance)
         return resistance
 
     def split_series(self, pattern):
@@ -110,29 +113,15 @@ class Transmittance(object):
 if __name__ == '__main__':
     pattern = '1, (2,3,4)//5//(6,7), 8'
     stratigraphy = {
-        '1': {'mat': 1, 'thk': 1, 'area': 3, 'cnd': .01},
-        '2': {'mat': 2, 'thk': 1, 'area': 1, 'rst': .02},
-        '3': {'mat': 3, 'thk': 1, 'area': 1, 'cnd': .03},
-        '4': {'mat': 2, 'thk': 1, 'area': 1, 'rst': .04},
-        '5': {'mat': 4, 'thk': 3, 'area': 1, 'cnd': .05},
-        '6': {'mat': 3, 'thk': 1.5, 'area': 1, 'cnd': .06},
-        '7': {'mat': 2, 'thk': 1.5, 'area': 1, 'rst': .07},
-        '8': {'mat': 1, 'thk': 1, 'area': 3, 'cnd': .08}
+        '1': {'mat': 1, 'thk': 1, 'area': 3, 'cnd': .1},
+        '2': {'mat': 2, 'thk': 1, 'area': 1, 'rst': .2},
+        '3': {'mat': 3, 'thk': 1, 'area': 1, 'cnd': .3},
+        '4': {'mat': 2, 'thk': 1, 'area': 1, 'rst': .4},
+        '5': {'mat': 4, 'thk': 3, 'area': 1, 'cnd': .5},
+        '6': {'mat': 3, 'thk': 1.5, 'area': 1, 'cnd': .6},
+        '7': {'mat': 2, 'thk': 1.5, 'area': 1, 'rst': .7},
+        '8': {'mat': 1, 'thk': 1, 'area': 3, 'cnd': .8}
     }
     area = 3
 
-    pattern1 = '1,2,3,4//5//6,7,8'
-    stratigraphy1 = {
-        '1': {'mat': 'i', 'thk': 1, 'area': .25, 'rst': .1},
-        '2': {'mat': 2, 'thk': .03, 'area': .25, 'cnd': .026},
-        '3': {'mat': 3, 'thk': .02, 'area': .25, 'cnd': .22},
-        '4': {'mat': 4, 'thk': .16, 'area': .015, 'cnd': .22},
-        '5': {'mat': 5, 'thk': .16, 'area': .22, 'cnd': .72},
-        '6': {'mat': 4, 'thk': .16, 'area': .015, 'cnd': .22},
-        '7': {'mat': 3, 'thk': .02, 'area': .25, 'cnd': .22},
-        '8': {'mat': 'e', 'thk': 1, 'area': .25, 'rst': .04}
-    }
-    area1 = .25
-
-    transmittance = Transmittance()
-    transmittance.global_resistance(pattern1, stratigraphy1, area1)
+    transmittance = Transmittance(pattern, stratigraphy, area)
