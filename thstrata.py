@@ -147,7 +147,7 @@ class Latex(Transmittance):
         pass
 
 
-def main():
+def test():
     pattern = "1, (2,3,4)//5//(6,7), 8"
     stratigraphy = {
         "1": {"mat": 1, "thk": 1, "area": 3, "cnd": .1},
@@ -167,4 +167,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test()
