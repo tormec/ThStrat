@@ -22,12 +22,13 @@ class Transmittance(object):
     "mat": material
     "thk": thickness
     "area"
-    "cnd": conduttivity
+    "cnd": conducttivity
     "rst": resistance
     """
     def __init__(self, pattern, strat, area):
         self.transmittance = 1 / self.resistance(pattern, strat, area)
         print(self.transmittance)
+        print(strat)
 
     def resistance(self, pattern, strat, area):
         """Calculate the resistance of a given pattern of a stratigraphy.
@@ -105,20 +106,22 @@ class Transmittance(object):
         else:
             rst = strat[idx]["rst"]  # (m^2 K)/W
         rst = rst / strat[idx]["area"]  # K/W
+        strat[idx]["rst/area"] = "{:.3f}".format(rst)  # 3 deciamls
         return rst
 
 
 class Latex(Transmittance):
+    """Write the LaTex document."""
     def __init__(self, pattern, stratigraphy, area, filename, lang):
         super().__init__(pattern, stratigraphy, area)
 
         preamble = self.preamble(lang)
-        # table = self.table()
+        table = self.table()
         with open(filename, "w") as f:
             f.write("\n".join(preamble))
-            f.write("\n\\begin{document}\n")
-            # f.write("\n".join(table))
-            f.write("\n\\end{document}")
+            f.write("\n\\begin{document}\n\n")
+            f.write("\n".join(table))
+            f.write("\n\n\\end{document}")
             f.closed
 
     def preamble(self, lang):
@@ -144,7 +147,32 @@ class Latex(Transmittance):
         """Table result of the stratigraphy.
         return table (list): the table
         """
-        pass
+        table = ["\\begin{table}[ht]",
+                 "\\centering",
+                 "\\begin{tabular}{c|ccccc|ccc}",
+                 "& "
+                 "[m] & "
+                 "$\left[\dfrac{W}{(K \cdot m)}\\right]$ & "
+                 "$\left[\dfrac{(m^2 \cdot K)}{W}\\right]$ & "
+                 "[$m^2$] & "
+                 "$\left[\dfrac{K}{W}\\right]$ & "
+                 "[$m^2$] & "
+                 "$\left[\dfrac{(m^2 \cdot K)}{W}\\right]$ & "
+                 "$\left[\dfrac{W}{(m^2 \cdot K)}\\right]$ \\\\",
+                 "\\# & "
+                 "$s_i$ & "
+                 "$\lambda_i$ & "
+                 "$R_i$ & "
+                 "$A_i$ & "
+                 "$R_i/A_i$ & "
+                 "$A$ & "
+                 "$R$ & "
+                 "$K$ \\\\",
+                 "\\hline",
+                 "\\hline",
+                 "\\end{tabular}",
+                 "\\end{table}"]
+        return table
 
 
 def test():
