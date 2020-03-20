@@ -149,7 +149,7 @@ class Latex(Transmittance):
 
 def test():
     pattern = "1, (2,3,4)//5//(6,7), 8"
-    stratigraphy = {
+    strat = {
         "1": {"mat": 1, "thk": 1, "area": 3, "cnd": .1},
         "2": {"mat": 2, "thk": 1, "area": 1, "rst": .2},
         "3": {"mat": 3, "thk": 1, "area": 1, "cnd": .3},
@@ -160,10 +160,10 @@ def test():
         "8": {"mat": 1, "thk": 1, "area": 3, "cnd": .8}
     }
     area = 3
-    filename = "testStrata.tex"
+    filename = "testThStrat.tex"
     lang = "english"
 
-    Latex(pattern, stratigraphy, area, filename, lang)
+    Latex(pattern, strat, area, filename, lang)
 
 
 if __name__ == "__main__":
