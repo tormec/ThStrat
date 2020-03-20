@@ -26,10 +26,10 @@ class Transmittance(object):
     "rst": resistance
     """
     def __init__(self, pattern, strat, area):
-        self.transmittance = 1 / self.global_resistance(pattern, strat, area)
+        self.transmittance = 1 / self.resistance(pattern, strat, area)
         print(self.transmittance)
 
-    def global_resistance(self, pattern, strat, area):
+    def resistance(self, pattern, strat, area):
         """Calculate the resistance of a given pattern of a stratigraphy.
 
         :param pattern (str): description of how materials are set out
@@ -43,24 +43,23 @@ class Transmittance(object):
         # calc the resistance of the structure
         rst = []
         for i in pattern:
-            i = i.split("//")  # indexes in parallel (if any)
-            if len(i) > 1:
+            i = i.split("//")
+            if len(i) > 1:  # indexes in parallel
                 p_rst = []
                 for p in i:
-                    p = p.strip("()")
-                    p = p.split(",")  # indexes in series in parallel (if any)
-                    if len(p) > 1:
+                    p = p.strip("()").split(",")
+                    if len(p) > 1:  # indexes in series in parallel
                         s_rst = []
                         for s in p:
-                            s_rst.append(self.rst(strat, s))
+                            s_rst.append(self.rst_material(strat, s))
                         p_rst.append(1 / sum(s_rst))
                     else:
-                        p_rst.append(1 / self.rst(strat, p[0]))
+                        p_rst.append(1 / self.rst_material(strat, p[0]))
                 rst.append(1 / sum(p_rst))
             else:
-                rst.append(self.rst(strat, i[0]))
-        resistance = sum(rst) * area  # (m^2 K)/W
-        return resistance
+                rst.append(self.rst_material(strat, i[0]))
+        tot_rst = sum(rst) * area  # (m^2 K)/W
+        return tot_rst
 
     def split_series(self, pattern):
         """Split the pattern into indexes in series.
@@ -93,7 +92,7 @@ class Transmittance(object):
                 idx = idx + str(v)
         return series
 
-    def rst(self, strat, idx):
+    def rst_material(self, strat, idx):
         """Return the resistence of a given material.
 
         :param strat (dict): info relative to each index in the pattern
@@ -114,11 +113,11 @@ class Latex(Transmittance):
         super().__init__(pattern, stratigraphy, area)
 
         preamble = self.preamble(lang)
-        table = self.table()
+        # table = self.table()
         with open(filename, "w") as f:
             f.write("\n".join(preamble))
             f.write("\n\\begin{document}\n")
-            f.write("\n".join(table))
+            # f.write("\n".join(table))
             f.write("\n\\end{document}")
             f.closed
 
