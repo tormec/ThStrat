@@ -28,12 +28,11 @@ class Transmittance(object):
     def __init__(self, pattern, strat, area):
         self.transmittance = 1 / self.resistance(pattern, strat, area)
         print(self.transmittance)
-        print(strat)
 
     def resistance(self, pattern, strat, area):
         """Calculate the resistance of a given pattern of a stratigraphy.
 
-        :param pattern (str): description of how materials are set out
+        :param pattern (str): sequence indexes of how materials set out
         :param strat (dict): info relative to each index in the pattern
         :param area (float): surface of the stratigraphy
         :return resistante (flot): the resistance [(m^2 K)/W]
@@ -70,8 +69,8 @@ class Transmittance(object):
         is splitted in:
         ["1", "(2,3,4)//5//(6,7)", "8"]
 
-        :param pattern (str): description of how materials are set out
-        :return series (list): indexes or chunks of the pattern in series
+        :param pattern (str): sequence indexes of how materials set out
+        :return series (list): (chunk of) indexes in series in the pattern
         """
         series = []
         idx = ""
@@ -112,11 +111,11 @@ class Transmittance(object):
 
 class Latex(Transmittance):
     """Write the LaTex document."""
-    def __init__(self, pattern, stratigraphy, area, filename, lang):
-        super().__init__(pattern, stratigraphy, area)
+    def __init__(self, pattern, strat, area, filename, lang):
+        super().__init__(pattern, strat, area)
 
         preamble = self.preamble(lang)
-        table = self.table()
+        table = self.table_results(strat)
         with open(filename, "w") as f:
             f.write("\n".join(preamble))
             f.write("\n\\begin{document}\n\n")
@@ -128,7 +127,7 @@ class Latex(Transmittance):
         """Preamble.
 
         :param lang (str): language to use for babel package
-        return preamble (list): the preamble
+        :return preamble (list): the preamble
         """
         preamble = ["\\documentclass[10pt,a4paper]{article}",
                     "\\usepackage[utf8]{inputenc}",
@@ -143,10 +142,23 @@ class Latex(Transmittance):
                     "\\usepackage{siunitx}"]
         return preamble
 
-    def table(self):
-        """Table result of the stratigraphy.
-        return table (list): the table
+    def table_results(self, strat):
+        """Table results of the stratigraphy.
+
+        :param strat (dict): info relative to each index in the pattern
+        :return table (list): the table
         """
+        data = []
+        for i in sorted(strat.keys()):
+            cdata = []
+            cdata.extend([i, str(strat[i]['mat']), str(strat[i]['thk'])])
+            if "cnd" in strat[i]:
+                cdata.append(str(strat[i]['cnd']))
+            else:
+                cdata.append(str(strat[i]['rst']))
+            cdata.extend([str(strat[i]['area']), str(strat[i]['rst/area'])])
+            data.append(" & ".join(cdata) + " \\\\")
+
         table = ["\\begin{table}[ht]",
                  "\\centering",
                  "\\begin{tabular}{c|ccccc|ccc}",
@@ -172,6 +184,7 @@ class Latex(Transmittance):
                  "\\hline",
                  "\\end{tabular}",
                  "\\end{table}"]
+        table[-3:1] = data
         return table
 
 
