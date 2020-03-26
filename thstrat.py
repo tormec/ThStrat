@@ -1,3 +1,6 @@
+import subprocess
+
+
 class Transmittance(object):
     """Calculate the transmittance of a stratigraphy with material
     in series or in parallel.
@@ -9,8 +12,8 @@ class Transmittance(object):
     For instance:
     pattern = "1,(2,3,4)//5//(6,7),8"
 
-    The indexes used in the pattern are different from the ones used to
-    identify different materials.
+    The indexes used in the pattern (n) are different from the ones used to
+    identify different materials (id).
     For instance:
     pattern = "1,2,3"
     stratigraphy = {
@@ -32,9 +35,9 @@ class Transmittance(object):
     def resistance(self, pattern, strat, area):
         """Calculate the resistance of a given pattern of a stratigraphy.
 
-        :param pattern (str): sequence indexes of how materials set out
-        :param strat (dict): info relative to each index in the pattern
-        :param area (float): surface of the stratigraphy
+        :param pattern (str): sequence of indexes in series or in parallel
+        :param strat (dict): info relative to each material in the pattern
+        :param area (float): tot surface of the stratigraphy
         :return resistante (flot): the resistance [(m^2 K)/W]
         """
         pattern = pattern.replace(" ", "")
@@ -69,43 +72,43 @@ class Transmittance(object):
         is splitted in:
         ["1", "(2,3,4)//5//(6,7)", "8"]
 
-        :param pattern (str): sequence indexes of how materials set out
+        :param pattern (str): sequence of indexes in series or in parallel
         :return series (list): (chunk of) indexes in series in the pattern
         """
         series = []
-        idx = ""
+        n = ""  # indexes used in the pattern
         inparallel = 0
         for i, v in enumerate(pattern):
             if v == "," and inparallel == 0:
-                series.append(idx)
-                idx = ""
+                series.append(n)
+                n = ""
             elif v == "(":
                 inparallel = 1
-                idx = idx + str(v)
+                n = n + str(v)
             elif v == ")" and pattern[i+1] == ",":
                 inparallel = 0
-                idx = idx + str(v)
+                n = n + str(v)
             elif i == len(pattern) - 1:
-                idx = idx + str(v)
-                series.append(idx)
+                n = n + str(v)
+                series.append(n)
             else:
-                idx = idx + str(v)
+                n = n + str(v)
         return series
 
-    def rst_material(self, strat, idx):
+    def rst_material(self, strat, n):
         """Return the resistence of a given material.
 
-        :param strat (dict): info relative to each index in the pattern
-        :param idx (str): position of a given material in the pattern
+        :param strat (dict): info relative to each material in the pattern
+        :param n (str): position of a given material in the pattern
         :return rst (float): the resistance
         """
         rst = 0
-        if "cnd" in strat[idx]:
-            rst = strat[idx]["thk"] / strat[idx]["cnd"]  # (m^2 K)/W
+        if "cnd" in strat[n]:
+            rst = strat[n]["thk"] / strat[n]["cnd"]  # (m^2 K)/W
         else:
-            rst = strat[idx]["rst"]  # (m^2 K)/W
-        rst = rst / strat[idx]["area"]  # K/W
-        strat[idx]["rst/area"] = "{:.3f}".format(rst)  # 3 deciamls
+            rst = strat[n]["rst"]  # (m^2 K)/W
+        rst = rst / strat[n]["area"]  # K/W
+        strat[n]["rst/area"] = "{:.3f}".format(rst)  # 3 deciamls
         return rst
 
 
@@ -145,7 +148,7 @@ class Latex(Transmittance):
     def table_results(self, strat):
         """Table results of the stratigraphy.
 
-        :param strat (dict): info relative to each index in the pattern
+        :param strat (dict): info relative to each material in the pattern
         :return table (list): the table
         """
         data = []
@@ -153,15 +156,16 @@ class Latex(Transmittance):
             cdata = []
             cdata.extend([i, str(strat[i]['mat']), str(strat[i]['thk'])])
             if "cnd" in strat[i]:
-                cdata.append(str(strat[i]['cnd']))
+                cdata.append(str(strat[i]['cnd']) + " &")
             else:
-                cdata.append(str(strat[i]['rst']))
+                cdata.append("& " + str(strat[i]['rst']))
             cdata.extend([str(strat[i]['area']), str(strat[i]['rst/area'])])
             data.append(" & ".join(cdata) + " \\\\")
 
         table = ["\\begin{table}[ht]",
                  "\\centering",
-                 "\\begin{tabular}{c|ccccc|ccc}",
+                 "\\begin{tabular}{c|cccccc|ccc}",
+                 "& "
                  "& "
                  "[m] & "
                  "$\left[\dfrac{W}{(K \cdot m)}\\right]$ & "
@@ -171,7 +175,8 @@ class Latex(Transmittance):
                  "[$m^2$] & "
                  "$\left[\dfrac{(m^2 \cdot K)}{W}\\right]$ & "
                  "$\left[\dfrac{W}{(m^2 \cdot K)}\\right]$ \\\\",
-                 "\\# & "
+                 "n & "
+                 "id & "
                  "$s_i$ & "
                  "$\lambda_i$ & "
                  "$R_i$ & "
@@ -205,6 +210,7 @@ def test():
     lang = "english"
 
     Latex(pattern, strat, area, filename, lang)
+    subprocess.run(["pdflatex", filename])
 
 
 if __name__ == "__main__":
