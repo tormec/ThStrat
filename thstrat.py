@@ -29,8 +29,9 @@ class Transmittance(object):
     "rst": resistance
     """
     def __init__(self, pattern, strat, area):
-        self.transmittance = 1 / self.resistance(pattern, strat, area)
-        print(self.transmittance)
+        self.tot_rst = self.resistance(pattern, strat, area)
+        self.tot_trn = 1 / self.tot_rst
+        print(self.tot_trn)
 
     def resistance(self, pattern, strat, area):
         """Calculate the resistance of a given pattern of a stratigraphy.
@@ -118,7 +119,7 @@ class Latex(Transmittance):
         super().__init__(pattern, strat, area)
 
         preamble = self.preamble(lang)
-        table = self.table_results(strat)
+        table = self.table_results(strat, area)
         with open(filename, "w") as f:
             f.write("\n".join(preamble))
             f.write("\n\\begin{document}\n\n")
@@ -145,12 +146,13 @@ class Latex(Transmittance):
                     "\\usepackage{siunitx}"]
         return preamble
 
-    def table_results(self, strat):
+    def table_results(self, strat, area):
         """Table results of the stratigraphy.
 
         :param strat (dict): info relative to each material in the pattern
         :return table (list): the table
         """
+        # data of each material in the startigraphy
         data = []
         for i in sorted(strat.keys()):
             cdata = []
@@ -161,6 +163,13 @@ class Latex(Transmittance):
                 cdata.append("& " + str(strat[i]['rst']))
             cdata.extend([str(strat[i]['area']), str(strat[i]['rst/area'])])
             data.append(" & ".join(cdata) + " \\\\")
+
+        # result of calculation
+        result = [" & " * 7 +
+                  " & ".join([str(area),
+                              "{:.3f}".format(self.tot_rst),
+                              "{:.3f}".format(self.tot_trn)]) +
+                  " \\\\"]
 
         table = ["\\begin{table}[ht]",
                  "\\centering",
@@ -175,8 +184,8 @@ class Latex(Transmittance):
                  "[$m^2$] & "
                  "$\left[\dfrac{(m^2 \cdot K)}{W}\\right]$ & "
                  "$\left[\dfrac{W}{(m^2 \cdot K)}\\right]$ \\\\",
-                 "n & "
-                 "id & "
+                 "\\textit{n} & "
+                 "\\textit{id} & "
                  "$s_i$ & "
                  "$\lambda_i$ & "
                  "$R_i$ & "
@@ -190,6 +199,7 @@ class Latex(Transmittance):
                  "\\end{tabular}",
                  "\\end{table}"]
         table[-3:1] = data
+        table[-2:1] = result
         return table
 
 
