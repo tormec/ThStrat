@@ -11,9 +11,19 @@ class Transmittance(object):
     * comma separated values in brackets: material in series within parallel
     For instance:
     pattern = "1,(2,3,4)//5//(6,7),8"
+    means:
+    |  1  |
+    |-----|
+    |2| | |
+    |-| |6|
+    |3|5|-|
+    |-| |7|
+    |4| | |
+    |-----|
+    |  8  |
 
-    The indexes used in the pattern (n) are different from the ones used to
-    identify different materials (id).
+    The indexes (n) used in the pattern are different from the ones used to
+    identify (id) different materials.
     For instance:
     pattern = "1,2,3"
     stratigraphy = {
